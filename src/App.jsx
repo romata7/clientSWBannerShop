@@ -1,11 +1,11 @@
 import { ClientProvider } from "./contexts/ClientContext";
-import { ClientForm } from "./features/clients/components/ClientForm";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Home } from "./pages/Home";
 
 const App = () => {
   return (
     <ClientProvider>
-      <ClientForm />
+      <Home />
     </ClientProvider>
   );
 }

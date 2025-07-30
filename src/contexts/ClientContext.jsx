@@ -2,7 +2,7 @@ import axios from "axios";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 const ClientContext = createContext();
-const BASE_URL = "http://localhost:3000/api/clients";
+const BASE_URL = "http://localhost:3001/api/clients";
 const emptyClient = {
     name: "",
     dniruc: "",
@@ -62,6 +62,23 @@ export const ClientProvider = ({ children }) => {
         }
     }, [currentClient, fetchClients]);
 
+    const deleteClient = useCallback(async (cliendId) => {
+        try {
+            setLoading(true);
+            const response = await axios.delete(`${BASE_URL}/${cliendId}`);
+            setCurrentClient(emptyClient);
+            setError(null);
+        } catch (err) {
+            setError(err.response?.data?.message || "Error al guardar cliente");
+            console.log(err)
+            throw err;
+        }
+        finally {
+            fetchClients();
+            setLoading(false);
+        }
+    })
+
     useEffect(() => {
         fetchClients()
     }, [fetchClients]);
@@ -78,7 +95,8 @@ export const ClientProvider = ({ children }) => {
                 loading,
                 saveClient,
                 isEditing,
-                setIsEditing
+                setIsEditing,
+                deleteClient
             }}
         >
             {children}
