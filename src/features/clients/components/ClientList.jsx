@@ -1,14 +1,26 @@
-import { Alert, ListGroup, Modal } from "react-bootstrap";
+import { Alert, Button, ListGroup } from "react-bootstrap";
 import { useClientContext } from "../../../contexts/ClientContext";
-import { CardHeading, Person, PersonDash, PersonFillGear, PinMap, Telephone } from "react-bootstrap-icons";
+import { CardHeading, Person, PersonDash, PersonFillGear, PinMap, Telephone, TrashFill } from "react-bootstrap-icons";
 import { useState } from "react";
 
-export const ClientList = (actions = true) => {
+export const ClientList = ({ actions = true }) => {
     const { clients, deleteClient } = useClientContext();
+    const [selectedClient, setSelectedClient] = useState(null);
 
-    const [showDeleteClientModal, setShowDeleteClientModal] = useState(false);
-    const [showEditClientModal, setShowEditClientModal] = useState(false)
-    const [selectedClient, setSelectedClient] = useState(null)
+    const handleDeleteClick = (client) => {
+        setSelectedClient(selectedClient?.id === client.id ? null : client);
+    };
+
+    const confirmDelete = async () => {
+        if (selectedClient) {
+            await deleteClient(selectedClient.id);
+            setSelectedClient(null);
+        }
+    };
+
+    const cancelDelete = () => {
+        setSelectedClient(null);
+    };
 
     if (clients?.length === 0) {
         return (
@@ -18,39 +30,19 @@ export const ClientList = (actions = true) => {
         );
     };
 
-    const confirmDeleteClient = (client) => {
-        console.log(client)
-        setSelectedClient(null);
-        setShowDeleteClientModal(false);
-    }
-
-    const confirmEditClient = (client) => {
-
-    }
-
-    const openDeleteClientModal = (client) => {
-        setShowDeleteClientModal(true);
-        setSelectedClient(client);
-    }
-
-    const openEditClietnModal = (client) => {
-        setShowEditClientModal(true);
-        setSelectedClient(client);
-    }
-
     return (
         <ListGroup>
             {clients.map(client => (
                 <ListGroup.Item
                     key={client.id}
-                    className="small py-2"
+                    className="small py-2 position-relative"
                 >
                     <div className="d-flex gap-2">
-                        <div>
+                        <div className="flex-grow-1">
                             <div className="d-flex gap-2 fw-bold mb-1">
                                 <Person className="align-self-center text-primary" /> {client.name}
                             </div>
-                            <div className="d-flex text-muted gap-2">
+                            <div className="d-flex text-muted gap-2 flex-wrap">
                                 <div style={{ whiteSpace: "nowrap" }}>
                                     <CardHeading className="align-self-center" /> {client.dniruc}
                                 </div>
@@ -65,31 +57,58 @@ export const ClientList = (actions = true) => {
                                 </div>
                             </div>
                         </div>
+                        
                         {actions && (
-                            <div className="d-flex gap-1">
+                            <div className="d-flex gap-1 align-items-center position-relative">
                                 <PersonDash
                                     size={24}
-                                    className="text-danger cursor-pointer"
-                                    onClick={() => openDeleteClientModal(client)}
+                                    className={`text-danger cursor-pointer ${selectedClient?.id === client.id ? 'opacity-75' : ''}`}
+                                    onClick={() => handleDeleteClick(client)}
                                     title="Eliminar Cliente"
                                 />
 
-                                <PersonFillGear size={24} className="text-primary" />
+                                <PersonFillGear 
+                                    size={24} 
+                                    className="text-primary cursor-pointer" 
+                                    title="Editar Cliente"
+                                />
+                                
+                                {selectedClient?.id === client.id && (
+                                    <Alert
+                                        variant="danger"
+                                        className="position-absolute top-0 start-100 ms-2 shadow-sm"
+                                        style={{ 
+                                            zIndex: 1000, 
+                                            width: '220px',
+                                            transform: 'translateY(25%)'
+                                        }}
+                                    >
+                                        <div className="d-flex flex-column small">
+                                            <p className="mb-2 text-center">¿Eliminar {client.name}?</p>
+                                            <div className="d-flex gap-2 justify-content-end">
+                                                <Button
+                                                    variant="outline-danger"
+                                                    size="sm"
+                                                    onClick={confirmDelete}
+                                                >
+                                                    <TrashFill className="me-1" size={12} /> Sí
+                                                </Button>
+                                                <Button
+                                                    variant="outline-secondary"
+                                                    size="sm"
+                                                    onClick={cancelDelete}
+                                                >
+                                                    No
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Alert>
+                                )}
                             </div>
                         )}
-                        {/* Modal para Eliminar */}
-                        <Modal show={showDeleteClientModal} onHide={() => setShowDeleteClientModal(false)}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Confirmar Eliminación</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                ¿Estás seguro que deseas elimnar?
-                            </Modal.Body>
-                        </Modal>
                     </div>
-
                 </ListGroup.Item>
             ))}
         </ListGroup>
-    )
-}
+    );
+};
