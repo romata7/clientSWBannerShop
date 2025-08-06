@@ -1,4 +1,4 @@
-import { Alert, Button, FloatingLabel, Form, ListGroup, Spinner } from "react-bootstrap";
+import { Alert, Button, Container, FloatingLabel, Form, ListGroup, Spinner } from "react-bootstrap";
 import { useClientContext } from "../../../contexts/ClientContext"
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ClientFields } from "./ClientFields";
@@ -17,13 +17,15 @@ export const ClientForm = () => {
     } = useClientContext();
 
     return (
-        <Form onSubmit={onSubmitClient}>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <ClientFields />
+        <Container>
+            <Form onSubmit={onSubmitClient}>
+                {error && <Alert variant="danger">{error}</Alert>}
+                <ClientFields />
 
-            <ClientActions />
+                <ClientActions />
 
-            <ClientList />
-        </Form>
+                <ClientList />
+            </Form>
+        </Container>
     )
 }

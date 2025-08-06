@@ -16,7 +16,6 @@ export const ClientProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false)
-
     const onSubmitClient = async (e) => {
         e.preventDefault();
         try {

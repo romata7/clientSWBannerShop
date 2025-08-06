@@ -1,25 +1,40 @@
 import { Alert, Button, ListGroup } from "react-bootstrap";
 import { useClientContext } from "../../../contexts/ClientContext";
-import { CardHeading, Person, PersonDash, PersonFillGear, PinMap, Telephone, TrashFill } from "react-bootstrap-icons";
-import { useState } from "react";
+import { CardHeading, Check, Pencil, PencilSquare, Person, PersonDash, PersonFillGear, PersonX, Phone, PinMap, Telephone, Trash, TrashFill, X } from "react-bootstrap-icons";
+import { useEffect, useState } from "react";
 
-export const ClientList = ({ actions = true }) => {
-    const { clients, deleteClient } = useClientContext();
+export const ClientList = ({ showActions = true }) => {
+    const { setIsEditing, setCurrentClient, clients, deleteClient } = useClientContext();
     const [selectedClient, setSelectedClient] = useState(null);
 
-    const handleDeleteClick = (client) => {
+    const handleDeleteClient = (client, e) => {
+        e.stopPropagation();
         setSelectedClient(selectedClient?.id === client.id ? null : client);
     };
 
-    const confirmDelete = async () => {
+    useEffect(() => {
+        console.log(selectedClient);
+    }, [selectedClient])
+
+    const confirmDelete = async (e) => {
+        e.stopPropagation();
         if (selectedClient) {
             await deleteClient(selectedClient.id);
             setSelectedClient(null);
         }
     };
 
-    const cancelDelete = () => {
+    const cancelDelete = (e) => {
+        e.stopPropagation();
         setSelectedClient(null);
+    };
+
+    const handleEditClient = (selectedClient, e) => {
+        e.stopPropagation();
+        if (selectedClient) {
+            setCurrentClient(selectedClient);
+            setIsEditing(true);
+        };
     };
 
     if (clients?.length === 0) {
@@ -35,9 +50,10 @@ export const ClientList = ({ actions = true }) => {
             {clients.map(client => (
                 <ListGroup.Item
                     key={client.id}
-                    className="small py-2 position-relative"
+                    className="small py-2"
+                    onClick={() => setSelectedClient(null)} // Cierra el alert al hacer clic en cualquier parte del ítem
                 >
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-2 position-relative">
                         <div className="flex-grow-1">
                             <div className="d-flex gap-2 fw-bold mb-1">
                                 <Person className="align-self-center text-primary" /> {client.name}
@@ -47,7 +63,7 @@ export const ClientList = ({ actions = true }) => {
                                     <CardHeading className="align-self-center" /> {client.dniruc}
                                 </div>
                                 <div style={{ whiteSpace: "nowrap" }}>
-                                    <Telephone className="align-self-center" /> {client?.phone}
+                                    <Phone className="align-self-center" /> {client?.phone}
                                 </div>
                                 <div className="d-flex gap-2">
                                     <div>
@@ -57,53 +73,50 @@ export const ClientList = ({ actions = true }) => {
                                 </div>
                             </div>
                         </div>
-                        
-                        {actions && (
-                            <div className="d-flex gap-1 align-items-center position-relative">
-                                <PersonDash
-                                    size={24}
-                                    className={`text-danger cursor-pointer ${selectedClient?.id === client.id ? 'opacity-75' : ''}`}
-                                    onClick={() => handleDeleteClick(client)}
-                                    title="Eliminar Cliente"
-                                />
 
-                                <PersonFillGear 
-                                    size={24} 
-                                    className="text-primary cursor-pointer" 
-                                    title="Editar Cliente"
-                                />
-                                
-                                {selectedClient?.id === client.id && (
-                                    <Alert
-                                        variant="danger"
-                                        className="position-absolute top-0 start-100 ms-2 shadow-sm"
-                                        style={{ 
-                                            zIndex: 1000, 
-                                            width: '220px',
-                                            transform: 'translateY(25%)'
-                                        }}
-                                    >
-                                        <div className="d-flex flex-column small">
-                                            <p className="mb-2 text-center">¿Eliminar {client.name}?</p>
-                                            <div className="d-flex gap-2 justify-content-end">
-                                                <Button
-                                                    variant="outline-danger"
-                                                    size="sm"
-                                                    onClick={confirmDelete}
-                                                >
-                                                    <TrashFill className="me-1" size={12} /> Sí
-                                                </Button>
-                                                <Button
-                                                    variant="outline-secondary"
-                                                    size="sm"
-                                                    onClick={cancelDelete}
-                                                >
-                                                    No
-                                                </Button>
+                        {showActions && (
+                            <div className="d-flex gap-1 align-items-center">
+                                <div className="position-relative">
+                                    <Trash
+                                        size={20}
+                                        color="red"
+                                        onClick={(e) => handleDeleteClient(client, e)}
+                                        role="button"
+                                        title="Eliminar Cliente"
+                                    />
+
+                                    {selectedClient?.id === client.id && (
+                                        <Alert
+                                            variant="danger"
+                                            className="position-absolute start-0 p-2"
+                                            style={{ zIndex: 1000 }}
+                                        >
+                                            <span className="fw-bold">¿Eliminar?</span>
+
+                                            <div className="d-flex gap-2 justify-content-center">
+                                                <Check
+                                                    size={24}
+                                                    style={{ color: '#5cb85c' }}
+                                                    role="button"
+                                                    onClick={(e) => confirmDelete(e)}
+                                                />
+                                                <X
+                                                    size={24}
+                                                    style={{ color: '#495057' }}
+                                                    role="button"
+                                                    onClick={() => cancelDelete}
+                                                />
                                             </div>
-                                        </div>
-                                    </Alert>
-                                )}
+                                        </Alert>
+                                    )}
+                                </div>
+                                <Pencil
+                                    size={20}
+                                    style={{ color: '#0a6deeff' }}
+                                    title="Editar Cliente"
+                                    role="button"
+                                    onClick={(e) => handleEditClient(client, e)}
+                                />
                             </div>
                         )}
                     </div>

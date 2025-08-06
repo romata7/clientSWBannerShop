@@ -1,6 +1,7 @@
 import { FloatingLabel, Form, ListGroup } from "react-bootstrap";
 import { useClientContext } from "../../../contexts/ClientContext";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CardHeading, Person, Phone } from "react-bootstrap-icons";
 
 export const ClientFields = () => {
     const { currentClient, setCurrentClient, setIsEditing, error, clients, loading } = useClientContext();
@@ -9,6 +10,8 @@ export const ClientFields = () => {
     const [suggestions, setSuggestions] = useState([]);
     const [isSelectingSuggestion, setIsSelectingSuggestion] = useState(false);
     const [activeField, setActiveField] = useState(null);
+
+    const suggestionsRef = useRef(null);
 
     // Función de filtrado memoizada
     const filterSuggestions = useCallback((searchTerm) => {
@@ -61,6 +64,20 @@ export const ClientFields = () => {
         return () => clearTimeout(timer);
     }, [currentClient?.name, isSelectingSuggestion, filterSuggestions, activeField]);
 
+    // Cerrar sugerencias al hacer clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
         <>
             <FloatingLabel controlId="name" label="Nombre/Razón Social" className="mb-3">
@@ -69,6 +86,15 @@ export const ClientFields = () => {
                     name="name"
                     value={currentClient?.name || ''}
                     onChange={onChangeCleintField}
+                    onFocus={() => {
+                        setActiveField('name');
+                        if (currentClient?.name?.length > 0) {
+                            setShowSuggestions(true);
+                        }
+                    }}
+                    onBlur={() => {
+                        setActiveField(null);
+                    }}
                     placeholder=""
                     required
                     autoComplete="off"
@@ -79,14 +105,15 @@ export const ClientFields = () => {
                     {error?.name}
                 </Form.Control.Feedback>
                 {showSuggestions && suggestions.length > 0 && (
-                    <ListGroup style={{
-                        zIndex: 1000,
-                        position: 'absolute',
-                        width: '100%',
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                        marginTop: '2px'
-                    }}>
+                    <ListGroup
+                        ref={suggestionsRef}
+                        style={{
+                            zIndex: 1000,
+                            position: 'absolute',
+                            width: 'auto',
+                            maxHeight: '300px',
+                            border: '1px solid rgba(0,0,0,0.1)'
+                        }}>
                         {suggestions.map(client => (
                             <ListGroup.Item
                                 key={client.id}
@@ -95,10 +122,21 @@ export const ClientFields = () => {
                                     handleSelectSuggestion(client);
                                     setIsEditing(true);
                                 }}
-                                className="small py-2"
+                                className="small py-2 bg-light hover-bg-light-subtle"
+                                style={{
+                                    borderLeft: 'none',
+                                    borderRight: 'none',
+                                    ':hover': {
+                                        backgroundColor: 'var(--bs-light-subtle)'
+                                    }
+                                }}
                             >
-                                <div className="fw-bold">{client.name}</div>
-                                <small className="text-muted">{client.dniruc}</small>
+                                <div className="fw-bold"><Person /> {client.name}</div>
+                                <div className="d-flex justify-content-between ">
+                                    <small className="text-muted"><CardHeading /> {client.dniruc} </small>
+                                    <small className="text-muted"><Phone /> {client.phone} </small>
+
+                                </div>
                             </ListGroup.Item>
                         ))}
                     </ListGroup>
