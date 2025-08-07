@@ -3,17 +3,17 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Home } from "./pages/Home";
 
-import { CustomNavbar } from "./components/navbar/CustomNavbar";
 import { Clients } from "./pages/Clients";
+import { MainNavbar } from "./components/navbar/MainNavbar";
 
 const App = () => {
   return (
     <ClientProvider>
       <Router>
-        <CustomNavbar />
+        <MainNavbar />
         <Routes>
           <Route path="/home" element={<Home />} />
-          <Route path="/clients" element={<Clients />} />
+          <Route path="/clientes" element={<Clients />} />
         </Routes>
       </Router>
     </ClientProvider>

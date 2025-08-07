@@ -1,7 +1,9 @@
+import { ClientForm } from "../features/clients/components/ClientForm"
+
 export const Clients = () =>{
     return(
         <div>
-            Hola desde clientes
+            <ClientForm />
         </div>
     )
 }
