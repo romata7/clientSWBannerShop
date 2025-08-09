@@ -17,10 +17,9 @@ export const MainNavbar = () => {
                 <Navbar.Collapse id="main-navbar-collapse">
                     <Nav>
                         {[
-                            { path: "/clientes", icon: <PersonFill />, text: "Clientes" },
-                            { path: "/servicios", icon: <Tools />, text: "Servicios" },
-                            { path: "/pendientes", icon: <ClockHistory />, text: "Pendientes" },
                             { path: "/ordenes", icon: <ClipboardCheck />, text: "Ordenes" },
+                            { path: "/clientes", icon: <PersonFill />, text: "Clientes" },
+                            { path: "/pendientes", icon: <ClockHistory />, text: "Pendientes" },
                         ].map(({ path, icon, text }) => (
                             <Nav.Link
                                 key={path}

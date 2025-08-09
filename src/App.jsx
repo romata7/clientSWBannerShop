@@ -5,6 +5,7 @@ import { Home } from "./pages/Home";
 
 import { Clients } from "./pages/Clients";
 import { MainNavbar } from "./components/navbar/MainNavbar";
+import { Orders } from "./pages/Orders";
 
 const App = () => {
   return (
@@ -12,8 +13,9 @@ const App = () => {
       <Router>
         <MainNavbar />
         <Routes>
-          <Route path="/home" element={<Home />} />
+          <Route path="/inicio" element={<Home />} />
           <Route path="/clientes" element={<Clients />} />
+          <Route path="/ordenes" element={<Orders />} />
         </Routes>
       </Router>
     </ClientProvider>

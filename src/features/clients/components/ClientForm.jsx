@@ -1,25 +1,229 @@
-import { Alert, Container, Form } from "react-bootstrap";
-import { useClientContext } from "../../../contexts/ClientContext"
-import { ClientFields } from "./ClientFields";
-import { ClientActions } from "./ClientActions";
-import { ClientList } from "./ClientList";
+import {
+    Container,
+    Form,
+    Alert,
+    Button,
+    Spinner,
+    ListGroup,
+    FloatingLabel,
+} from "react-bootstrap";
+import {
+    Person,
+    CardHeading,
+    Phone,
+    PinMap,
+} from "react-bootstrap-icons";
+import { useCallback, useRef, useState, useEffect } from "react";
+import { useClientContext } from "../../../contexts/ClientContext";
 
-export const ClientForm = () => {
+/**
+ * Componente principal para el formulario de clientes.
+ * Consolida los campos y las acciones en un solo componente.
+ *
+ * @param {boolean} showActions - Controla la visibilidad de los botones de acción (Guardar/Limpiar).
+ */
+export const ClientForm = ({ showActions = true }) => {
+    // Obtiene el estado y las funciones del contexto del cliente
     const {
+        currentClient,
+        setCurrentClient,
         onSubmitClient,
-        error
+        error,
+        clients,
+        emptyClient,
+        loading,
+        isEditing,
+        setIsEditing,
     } = useClientContext();
 
+    // Estado local para gestionar las sugerencias
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const [isSelectingSuggestion, setIsSelectingSuggestion] = useState(false);
+    const suggestionsRef = useRef(null);
+    const nameInputRef = useRef(null);
+
+    // Filtra las sugerencias basándose en el valor del campo de nombre
+    const filterSuggestions = useCallback(
+        (searchTerm) => {
+            if (!searchTerm || searchTerm.length < 1) {
+                return [];
+            }
+            const term = searchTerm.toLowerCase();
+            return clients
+                .filter((client) => client.name.toLowerCase().includes(term))
+                .slice(0, 10);
+        },
+        [clients]
+    );
+
+    // Maneja los cambios en los campos del formulario
+    const onChangeClientField = useCallback(
+        (e) => {
+            const { name, value } = e.target;
+            setCurrentClient((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+
+            // Si el campo es 'name', actualiza las sugerencias
+            if (name === "name") {
+                setIsSelectingSuggestion(false);
+                const filtered = filterSuggestions(value);
+                setSuggestions(filtered);
+                setShowSuggestions(filtered.length > 0);
+            }
+        },
+        [setCurrentClient, filterSuggestions]
+    );
+
+    // Maneja la selección de una sugerencia
+    const selectSuggestion = useCallback(
+        (client) => {
+            setCurrentClient(client);
+            setIsEditing(true);
+            setShowSuggestions(false);
+            setIsSelectingSuggestion(true);
+        },
+        [setCurrentClient, setIsEditing]
+    );
+
+    // Oculta las sugerencias al hacer clic fuera del componente
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                nameInputRef.current &&
+                !nameInputRef.current.contains(event.target) &&
+                suggestionsRef.current &&
+                !suggestionsRef.current.contains(event.target)
+            ) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
-        <Container>
-            <Form onSubmit={onSubmitClient}>
-                {error && <Alert variant="danger">{error}</Alert>}
-                <ClientFields />
+        <Form onSubmit={onSubmitClient}>
+            {/* Muestra un error si existe */}
+            {error && <Alert variant="danger">{error}</Alert>}
 
-                <ClientActions />
+            {/* Campos del formulario */}
+            <>
+                <FloatingLabel
+                    controlId="name"
+                    label="Nombre/Razón social"
+                    className="mb-3 position-relative"
+                    ref={nameInputRef}
+                >
+                    <Form.Control
+                        type="text"
+                        name="name"
+                        value={currentClient.name}
+                        onChange={onChangeClientField}
+                        // Simplifica el manejador de onFocus ya que filterSuggestions
+                        // maneja correctamente el caso de un string vacío.
+                        onFocus={() => {
+                            const filtered = filterSuggestions(currentClient.name);
+                            setSuggestions(filtered);
+                            setShowSuggestions(filtered.length > 0);
+                        }}
+                        placeholder=""
+                        autoComplete="off"
+                        required
+                    />
+                    {/* Muestra las sugerencias si es necesario */}
+                    {showSuggestions && (
+                        <ListGroup
+                            className="position-absolute start-0 w-auto shadow-sm"
+                            style={{ zIndex: 1000 }}
+                            ref={suggestionsRef}
+                        >
+                            {suggestions.map((client) => (
+                                <ListGroup.Item
+                                    key={client.id}
+                                    action
+                                    onClick={() => selectSuggestion(client)}
+                                >
+                                    <div className="d-flex gap-2">
+                                        <Person className="align-self-center text-primary" />
+                                        <span className="flex-grow-1">{client.name}</span>
+                                        <CardHeading className="align-self-center text-primary ms-4" />
+                                        <small className="text-muted">{client.dniruc}</small>
+                                    </div>
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    )}
+                </FloatingLabel>
 
-                <ClientList />
-            </Form>
-        </Container>
-    )
-}
+                <FloatingLabel controlId="dniruc" label="D.N.I/R.U.C" className="mb-3">
+                    <Form.Control
+                        type="text"
+                        name="dniruc"
+                        value={currentClient.dniruc}
+                        onChange={onChangeClientField}
+                        placeholder=""
+                        required
+                    />
+                </FloatingLabel>
+
+                <FloatingLabel controlId="phone" label="Teléfono/Celular" className="mb-3">
+                    <Form.Control
+                        type="text"
+                        name="phone"
+                        value={currentClient.phone}
+                        onChange={onChangeClientField}
+                        placeholder=""
+                    />
+                </FloatingLabel>
+
+                <FloatingLabel controlId="address" label="Dirección" className="mb-3">
+                    <Form.Control
+                        type="text"
+                        name="address"
+                        value={currentClient.address}
+                        onChange={onChangeClientField}
+                        placeholder=""
+                    />
+                </FloatingLabel>
+            </>
+
+            {/* Botones de acción, solo se muestran si showActions es true */}
+            {showActions && (
+                <div className="d-flex gap-2 justify-content-end mb-3">
+                    <Button
+                        variant="outline-secondary"
+                        onClick={() => {
+                            setCurrentClient(emptyClient);
+                            setIsEditing(false);
+                        }}
+                        disabled={loading}
+                    >
+                        {isEditing ? "Cancelar" : "Limpiar"}
+                    </Button>
+                    <Button
+                        variant="outline-primary"
+                        type="submit"
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" />
+                                <span className="ms-2">Guardando...</span>
+                            </>
+                        ) : isEditing ? (
+                            "Actualizar"
+                        ) : (
+                            "Guardar"
+                        )}
+                    </Button>
+                </div>
+            )}
+        </Form>
+    );
+};
