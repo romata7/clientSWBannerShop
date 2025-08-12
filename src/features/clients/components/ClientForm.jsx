@@ -1,7 +1,5 @@
 import {
-    Container,
     Form,
-    Alert,
     Button,
     Spinner,
     ListGroup,
@@ -10,11 +8,9 @@ import {
 import {
     Person,
     CardHeading,
-    Phone,
-    PinMap,
 } from "react-bootstrap-icons";
 import { useCallback, useRef, useState, useEffect } from "react";
-import { useClientContext } from "../../../contexts/ClientContext";
+import { useClientsContext } from "../context/ClientsContext";
 
 /**
  * Componente principal para el formulario de clientes.
@@ -22,33 +18,46 @@ import { useClientContext } from "../../../contexts/ClientContext";
  *
  * @param {boolean} showActions - Controla la visibilidad de los botones de acción (Guardar/Limpiar).
  */
+
 export const ClientForm = ({ showActions = true }) => {
     // Obtiene el estado y las funciones del contexto del cliente
     const {
         currentClient,
         setCurrentClient,
-        onSubmitClient,
-        error,
         clients,
-        emptyClient,
         loading,
         isEditing,
         setIsEditing,
-    } = useClientContext();
+        saveClient,
+        updateClient,
+        emptyClient
+    } = useClientsContext();
 
-    // Estado local para gestionar las sugerencias
+    // Estado local para gestionar las sugerencias    
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const [isSelectingSuggestion, setIsSelectingSuggestion] = useState(false);
     const suggestionsRef = useRef(null);
     const nameInputRef = useRef(null);
 
+    const onSubmitClient = async (e) => {
+        e.preventDefault();
+        try {
+            const { id, ...restCurrentClient } = currentClient;
+            if (isEditing) {
+                await updateClient(id, restCurrentClient);
+            } else {
+                await saveClient(currentClient);
+            };
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     // Filtra las sugerencias basándose en el valor del campo de nombre
     const filterSuggestions = useCallback(
         (searchTerm) => {
-            if (!searchTerm || searchTerm.length < 1) {
-                return [];
-            }
+            if (!searchTerm || searchTerm.length < 1) return [];
             const term = searchTerm.toLowerCase();
             return clients
                 .filter((client) => client.name.toLowerCase().includes(term))
@@ -109,10 +118,6 @@ export const ClientForm = ({ showActions = true }) => {
 
     return (
         <Form onSubmit={onSubmitClient}>
-            {/* Muestra un error si existe */}
-            {error && <Alert variant="danger">{error}</Alert>}
-
-            {/* Campos del formulario */}
             <>
                 <FloatingLabel
                     controlId="name"
@@ -194,36 +199,38 @@ export const ClientForm = ({ showActions = true }) => {
             </>
 
             {/* Botones de acción, solo se muestran si showActions es true */}
-            {showActions && (
-                <div className="d-flex gap-2 justify-content-end mb-3">
-                    <Button
-                        variant="outline-secondary"
-                        onClick={() => {
-                            setCurrentClient(emptyClient);
-                            setIsEditing(false);
-                        }}
-                        disabled={loading}
-                    >
-                        {isEditing ? "Cancelar" : "Limpiar"}
-                    </Button>
-                    <Button
-                        variant="outline-primary"
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <Spinner as="span" animation="border" size="sm" />
-                                <span className="ms-2">Guardando...</span>
-                            </>
-                        ) : isEditing ? (
-                            "Actualizar"
-                        ) : (
-                            "Guardar"
-                        )}
-                    </Button>
-                </div>
-            )}
-        </Form>
+            {
+                showActions && (
+                    <div className="d-flex gap-2 justify-content-end mb-3">
+                        <Button
+                            variant="outline-secondary"
+                            onClick={() => {
+                                setCurrentClient(emptyClient);
+                                setIsEditing(false);
+                            }}
+                            disabled={loading}
+                        >
+                            {isEditing ? "Cancelar" : "Limpiar"}
+                        </Button>
+                        <Button
+                            variant="outline-primary"
+                            type="submit"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <Spinner as="span" animation="border" size="sm" />
+                                    <span className="ms-2">Guardando...</span>
+                                </>
+                            ) : isEditing ? (
+                                "Actualizar"
+                            ) : (
+                                "Guardar"
+                            )}
+                        </Button>
+                    </div>
+                )
+            }
+        </Form >
     );
 };

@@ -1,5 +1,4 @@
-import { Alert, Button, ListGroup } from "react-bootstrap";
-import { useClientContext } from "../../../contexts/ClientContext";
+import { Alert, ListGroup } from "react-bootstrap";
 import {
     Pencil,
     Person,
@@ -11,10 +10,11 @@ import {
     X,
 } from "react-bootstrap-icons";
 import { useState } from "react";
+import { useClientsContext } from "../context/ClientsContext";
 
 export const ClientList = ({ showActions = true }) => {
     // Obtener las funciones y el estado del contexto de clientes
-    const { setIsEditing, setCurrentClient, clients, deleteClient, loading } = useClientContext();
+    const { setIsEditing, setCurrentClient, clients, removeClient } = useClientsContext();
 
     const [clientToDelete, setClientToDelete] = useState(null);
 
@@ -36,7 +36,7 @@ export const ClientList = ({ showActions = true }) => {
     const confirmDelete = async (e) => {
         e.stopPropagation();
         if (clientToDelete) {
-            await deleteClient(clientToDelete.id);
+            await removeClient(clientToDelete.id);
             setClientToDelete(null);
         }
     };

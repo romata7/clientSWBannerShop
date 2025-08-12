@@ -3,12 +3,13 @@ import { Button, FloatingLabel, Form, Modal } from "react-bootstrap"
 import { Pencil } from "react-bootstrap-icons"
 
 const emptyDesign = {
+    id: null,
     quantity: 1,
-    description: "",
-    height: "",
-    width: "",
-    unit: "cm",
-    cost: ""
+    description: '',
+    height: 0.01,
+    width: 0.01,
+    unit: 'cm',
+    cost: 0.01
 }
 
 export const DesignModal = ({ design: propDesign }) => {
@@ -87,6 +88,7 @@ export const DesignModal = ({ design: propDesign }) => {
                                 onChange={handleChange}
                                 min={1}
                                 required
+                                autoFocus
                             />
                             <Form.Control.Feedback type="invalid">
                                 Ingrese una cantidad válida
