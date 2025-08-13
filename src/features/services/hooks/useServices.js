@@ -42,6 +42,8 @@ export const useServices = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [message, setMessage] = useState(null);
 
+    const [localDesign, setLocalDesign] = useState(null);
+
     function designsReducer(state, action) {
         switch (action.type) {
             case 'ADD':
@@ -62,6 +64,8 @@ export const useServices = () => {
 
     return {
         designs,
-        dispatch
+        dispatch,
+        localDesign,
+        setLocalDesign
     };
 }

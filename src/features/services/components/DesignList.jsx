@@ -1,16 +1,23 @@
 import { Alert, Badge, Button, ListGroup } from "react-bootstrap";
 import { useServicesContext } from "../context/ServicesContext"
-import { Check, Pencil, PencilSquare, Rulers, Trash, X } from "react-bootstrap-icons";
-import { useRef, useState } from "react";
+import { Check, CheckLg, Pencil, PencilSquare, Rulers, Trash, X } from "react-bootstrap-icons";
+import { useCallback, useRef, useState } from "react";
 import { DesignModal } from "./modals/DesignModal";
 
 export const DesignList = () => {
-    const [currentAlert, setCurrentAlert] = useState({ id: null, timer: 0 });
-    const [currentModal, setCurrentModal] = useState(null);
     const timerRef = useRef(null);
-    const { designs, dispatch } = useServicesContext();
+    const { setLocalDesign, designs, dispatch } = useServicesContext();
 
-    const [currentDesign, setCurrentDesign] = useState(null)
+    const [currentAlert, setCurrentAlert] = useState({ id: null, timer: 0 });
+    const [showModal, setShowModal] = useState(false);
+
+    const handelShowModal = () => setShowModal(true);
+    const handelCloseModal = () => setShowModal(false);
+
+    const handleEdit = useCallback((design) => {
+        setLocalDesign(design);
+        handelShowModal();
+    }, []);
 
     if (designs.length === 0) {
         return (
@@ -20,11 +27,9 @@ export const DesignList = () => {
         );
     }
 
-    function showDeleteMessage(d) {
-        // Limpiar cualquier temporizador existente
+    const handleDeleteAlert = (d) => {
         if (timerRef.current) clearInterval(timerRef.current);
 
-        // Iniciar nuevo temporizador
         let timer = 3;
         setCurrentAlert({ id: d.id, timer });
 
@@ -42,6 +47,7 @@ export const DesignList = () => {
     function handleConfirmDelete() {
         if (currentAlert.id) {
             dispatch({ type: 'REMOVE', payload: currentAlert.id });
+            setLocalDesign(null);
         }
         if (timerRef.current) clearInterval(timerRef.current);
         setCurrentAlert({ id: null, timer: 0 });
@@ -51,15 +57,6 @@ export const DesignList = () => {
         if (timerRef.current) clearInterval(timerRef.current);
         setCurrentAlert({ id: null, timer: 0 });
     }
-
-    function handleEditDesign(d) {
-        setCurrentDesign(d);
-        handleShowDesignModal();
-    }
-
-    const [showDesignModal, setShowDesignModal] = useState(false);
-    const handleShowDesignModal = () => setShowDesignModal(true);
-    const handleCloseDesignModal = () => setShowDesignModal(false);
 
     return (
         <ListGroup>
@@ -89,7 +86,7 @@ export const DesignList = () => {
                                 color="red"
                                 size={18}
                                 title="Eliminar"
-                                onClick={() => showDeleteMessage(d)}
+                                onClick={() => handleDeleteAlert(d)}
                             />
                             {d.id === currentAlert.id && (
                                 <Alert
@@ -123,14 +120,17 @@ export const DesignList = () => {
                                 role="button"
                                 size={18}
                                 title="Editar"
-                                onClick={() => handleEditDesign(d)}
+                                onClick={() => handleEdit(d)}
                             />
                         </div>
                     </div>
                 </ListGroup.Item>
             ))}
-            {showDesignModal && (
-                <DesignModal show={showDesignModal} handleClose={handleCloseDesignModal} design={currentDesign} />
+            {showModal && (
+                <DesignModal
+                    show={showModal}
+                    handleClose={handelCloseModal}
+                />
             )}
         </ListGroup>
     )

@@ -13,13 +13,13 @@ const emptyDesign = {
     cost: 0.01
 }
 export const DesignModal = ({
-    inputDesign,
     show,
     handleClose
 }) => {
-    const editMode = inputDesign?.id ? true : false;
+    const { localDesign, setLocalDesign } = useServicesContext();
+    const editMode = localDesign?.id ? true : false;
 
-    const [design, setDesign] = useState(editMode ? inputDesign : emptyDesign);
+    const [design, setDesign] = useState(editMode ? localDesign : emptyDesign);
     const [validated, setValidated] = useState(false);
 
     const { dispatch } = useServicesContext();
@@ -52,7 +52,7 @@ export const DesignModal = ({
         editMode
             ? dispatch({ type: 'UPDATE', payload: design })
             : dispatch({ type: 'ADD', payload: design });
-
+        setLocalDesign(null);
         handleClose();
     }
     return (
