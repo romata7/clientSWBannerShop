@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useReducer, useState } from "react";
 
 const emptyService = {
     design: {
@@ -42,23 +42,26 @@ export const useServices = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [message, setMessage] = useState(null);
 
-    // Cargar servicios
-    const fetchServices = useCallback(async () => {
-        try {
-            setLoading(true);
-            const data = await getServices();
-            if (Array.isArray(data)) {
-                setServices(data);
-            } else {
-                setMessage(data);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
+    function designsReducer(state, action) {
+        switch (action.type) {
+            case 'ADD':
+                return [...state, { ...action.payload, id: Date.now() }];
+            case 'UPDATE':
+                return state.map(d =>
+                    d.id === action.payload.id ? { ...d, ...action.payload } : d
+                );
+            case 'REMOVE':
+                return state.filter(d => d.id !== action.payload);
+            default:
+                return state;
         }
-    }, [])
+    }
+
+    const [designs, dispatch] = useReducer(designsReducer, [])
+
+
     return {
-        fetchServices
+        designs,
+        dispatch
     };
 }
