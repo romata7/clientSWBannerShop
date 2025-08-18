@@ -12,43 +12,47 @@ import {
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useClientsContext } from "../context/ClientsContext";
 
-/**
- * Componente principal para el formulario de clientes.
- * Consolida los campos y las acciones en un solo componente.
- *
- * @param {boolean} showActions - Controla la visibilidad de los botones de acción (Guardar/Limpiar).
- */
+const emptyClient = {
+    id: null,
+    name: "",
+    dniruc: "",
+    phone: "",
+    address: ""
+};
 
 export const ClientForm = ({ showActions = true }) => {
     // Obtiene el estado y las funciones del contexto del cliente
     const {
-        currentClient,
-        setCurrentClient,
         clients,
         loading,
-        isEditing,
-        setIsEditing,
         saveClient,
         updateClient,
-        emptyClient
+        localClient,
+        setLocalClient,
     } = useClientsContext();
 
+    const editMode = localClient?.id ? true : false;
+
     // Estado local para gestionar las sugerencias    
+    const [client, setClient] = useState(editMode ? localClient : emptyClient);
+
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const [isSelectingSuggestion, setIsSelectingSuggestion] = useState(false);
+
     const suggestionsRef = useRef(null);
     const nameInputRef = useRef(null);
 
     const onSubmitClient = async (e) => {
         e.preventDefault();
         try {
-            const { id, ...restCurrentClient } = currentClient;
-            if (isEditing) {
-                await updateClient(id, restCurrentClient);
+            const { id, ...restClient } = client;
+            if (editMode) {
+                await updateClient(id, restClient);
             } else {
-                await saveClient(currentClient);
+                await saveClient(client);
             };
+            setLocalClient(null);
         } catch (err) {
             console.log(err)
         }
@@ -70,7 +74,7 @@ export const ClientForm = ({ showActions = true }) => {
     const onChangeClientField = useCallback(
         (e) => {
             const { name, value } = e.target;
-            setCurrentClient((prev) => ({
+            setClient((prev) => ({
                 ...prev,
                 [name]: value,
             }));
@@ -83,18 +87,17 @@ export const ClientForm = ({ showActions = true }) => {
                 setShowSuggestions(filtered.length > 0);
             }
         },
-        [setCurrentClient, filterSuggestions]
+        [setClient, filterSuggestions]
     );
 
     // Maneja la selección de una sugerencia
     const selectSuggestion = useCallback(
         (client) => {
-            setCurrentClient(client);
-            setIsEditing(true);
+            setClient(client);
             setShowSuggestions(false);
             setIsSelectingSuggestion(true);
         },
-        [setCurrentClient, setIsEditing]
+        [setClient]
     );
 
     // Oculta las sugerencias al hacer clic fuera del componente
@@ -128,12 +131,12 @@ export const ClientForm = ({ showActions = true }) => {
                     <Form.Control
                         type="text"
                         name="name"
-                        value={currentClient.name}
+                        value={client.name}
                         onChange={onChangeClientField}
                         // Simplifica el manejador de onFocus ya que filterSuggestions
                         // maneja correctamente el caso de un string vacío.
                         onFocus={() => {
-                            const filtered = filterSuggestions(currentClient.name);
+                            const filtered = filterSuggestions(client.name);
                             setSuggestions(filtered);
                             setShowSuggestions(filtered.length > 0);
                         }}
@@ -170,7 +173,7 @@ export const ClientForm = ({ showActions = true }) => {
                     <Form.Control
                         type="text"
                         name="dniruc"
-                        value={currentClient.dniruc}
+                        value={client.dniruc}
                         onChange={onChangeClientField}
                         placeholder=""
                         required
@@ -181,7 +184,7 @@ export const ClientForm = ({ showActions = true }) => {
                     <Form.Control
                         type="text"
                         name="phone"
-                        value={currentClient.phone}
+                        value={client.phone}
                         onChange={onChangeClientField}
                         placeholder=""
                     />
@@ -191,7 +194,7 @@ export const ClientForm = ({ showActions = true }) => {
                     <Form.Control
                         type="text"
                         name="address"
-                        value={currentClient.address}
+                        value={client.address}
                         onChange={onChangeClientField}
                         placeholder=""
                     />
@@ -205,12 +208,12 @@ export const ClientForm = ({ showActions = true }) => {
                         <Button
                             variant="outline-secondary"
                             onClick={() => {
-                                setCurrentClient(emptyClient);
-                                setIsEditing(false);
+                                setClient(emptyClient);
+                                setLocalClient(null);
                             }}
                             disabled={loading}
                         >
-                            {isEditing ? "Cancelar" : "Limpiar"}
+                            {editMode ? "Cancelar" : "Limpiar"}
                         </Button>
                         <Button
                             variant="outline-primary"
@@ -222,7 +225,7 @@ export const ClientForm = ({ showActions = true }) => {
                                     <Spinner as="span" animation="border" size="sm" />
                                     <span className="ms-2">Guardando...</span>
                                 </>
-                            ) : isEditing ? (
+                            ) : editMode ? (
                                 "Actualizar"
                             ) : (
                                 "Guardar"

@@ -10,6 +10,9 @@ const emptyClient = {
 };
 
 export const useClients = () => {
+
+    const [localClient, setLocalClient] = useState(null)
+
     const [clients, setClients] = useState([]);
     const [currentClient, setCurrentClient] = useState(emptyClient);
     const [loading, setLoading] = useState(false);
@@ -96,6 +99,8 @@ export const useClients = () => {
         saveClient,
         updateClient,
         removeClient,
-        emptyClient
+        emptyClient,
+        localClient,
+        setLocalClient
     }
 };

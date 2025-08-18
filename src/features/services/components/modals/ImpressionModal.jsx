@@ -1,30 +1,31 @@
 import { useState } from "react";
-import { Button, FloatingLabel, Form, Modal } from "react-bootstrap"
-import { Pencil } from "react-bootstrap-icons";
 import { useServicesContext } from "../../context/ServicesContext";
+import { Printer } from "react-bootstrap-icons";
+import { Button, FloatingLabel, Form, Modal } from "react-bootstrap";
 
-const emptyDesign = {
+const emptyPrint = {
     id: null,
     quantity: 1,
-    description: '',
+    description: "",
     height: 0.01,
     width: 0.01,
-    unit: 'cm',
+    unit: "cm",
     cost: 0.01
-}
-export const DesignModal = ({
+};
+
+export const ImpressionModal = ({
     show,
     handleClose
 }) => {
-    const { localDesign, setLocalDesign, designDispatch } = useServicesContext();
-    const editMode = localDesign?.id ? true : false;
+    const { localImpression, setLocalImpression, impressionDispatch } = useServicesContext();
+    const editMode = localImpression?.id ? true : false;
 
-    const [design, setDesign] = useState(editMode ? localDesign : emptyDesign);
+    const [print, setPrint] = useState(editMode ? localImpression : emptyPrint);
     const [validated, setValidated] = useState(false);
 
     const title = editMode
-        ? <><Pencil /> Actualizar Diseño</>
-        : <><Pencil /> Registrar Diseño</>;
+        ? <><Printer /> Actualizar Impresión</>
+        : <><Printer /> Registrar Impresión</>;
 
     const submitButtonText = editMode
         ? "Actualizar"
@@ -32,11 +33,11 @@ export const DesignModal = ({
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setDesign(prev => ({
+        setPrint(prev => ({
             ...prev,
-            [name]: value,
+            [name]: value
         }));
-    }
+    };
 
     const handleCheckForm = (e) => {
         e.preventDefault();
@@ -47,12 +48,15 @@ export const DesignModal = ({
             setValidated(true);
             return;
         }
+
         editMode
-            ? designDispatch({ type: 'UPDATE', payload: design })
-            : designDispatch({ type: 'ADD', payload: design });
-        setLocalDesign(null);
+            ? impressionDispatch({ type: 'UPDATE', payload: print })
+            : impressionDispatch({ type: 'ADD', payload: print });
+
+        setLocalImpression(null);
         handleClose();
-    }
+    };
+
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
@@ -67,10 +71,10 @@ export const DesignModal = ({
                     <FloatingLabel controlId="quantity" label="Cantidad">
                         <Form.Control
                             type="number"
-                            step="1"
+                            step={1}
                             name="quantity"
                             placeholder=""
-                            value={design.quantity}
+                            value={print.quantity}
                             onChange={handleChange}
                             min={1}
                             required
@@ -80,11 +84,12 @@ export const DesignModal = ({
                             Ingrese una cantidad válida
                         </Form.Control.Feedback>
                     </FloatingLabel>
-                    <FloatingLabel controlId="description" label="Descripción" className="mb-3">
+
+                    <FloatingLabel controlId="description" label="Descripción">
                         <Form.Control
                             as="textarea"
                             name="description"
-                            value={design.description}
+                            value={print.description}
                             onChange={handleChange}
                             required
                             style={{ height: '100px' }}
@@ -94,13 +99,13 @@ export const DesignModal = ({
                         </Form.Control.Feedback>
                     </FloatingLabel>
 
-                    <div className="d-flex gap-2 mb-3">
-                        <FloatingLabel controlId="height" label="Alto" className="flex-grow-1">
+                    <div className="d-flex gap-2">
+                        <FloatingLabel controlId="height" label="Alto">
                             <Form.Control
                                 type="number"
-                                step="0.01"
+                                step={0.01}
                                 name="height"
-                                value={design.height}
+                                value={print.height}
                                 onChange={handleChange}
                                 min={0.01}
                                 required
@@ -110,25 +115,25 @@ export const DesignModal = ({
                             </Form.Control.Feedback>
                         </FloatingLabel>
 
-                        <FloatingLabel controlId="width" label="Ancho" className="flex-grow-1">
+                        <FloatingLabel controlId="width" label="Ancho">
                             <Form.Control
                                 type="number"
-                                step="0.01"
+                                step={0.01}
                                 name="width"
-                                value={design.width}
+                                value={print.width}
                                 onChange={handleChange}
                                 min={0.01}
                                 required
                             />
                             <Form.Control.Feedback type="invalid">
-                                Ingrese un valor válido
+                                Ingrese un valod válido
                             </Form.Control.Feedback>
                         </FloatingLabel>
 
-                        <FloatingLabel controlId="unit" label="Unidades" className="flex-grow-1">
+                        <FloatingLabel controlId="unit" label="Unidades">
                             <Form.Select
                                 name="unit"
-                                value={design.unit}
+                                value={print.unit}
                                 onChange={handleChange}
                                 required
                             >
@@ -138,12 +143,12 @@ export const DesignModal = ({
                         </FloatingLabel>
                     </div>
 
-                    <FloatingLabel controlId="cost" label="Costo (S/)" className="mb-3">
+                    <FloatingLabel controlId="cost" label="Costo">
                         <Form.Control
                             type="number"
-                            step="0.01"
+                            step={0.01}
                             name="cost"
-                            value={design.cost}
+                            value={print.cost}
                             onChange={handleChange}
                             min={0.01}
                             required
@@ -158,13 +163,12 @@ export const DesignModal = ({
                         <Button variant="secondary" onClick={handleClose}>
                             Cancelar
                         </Button>
-                        <Button variant="primary" type="submit"  >
+                        <Button variant="primary" type="submit">
                             {submitButtonText}
                         </Button>
                     </div>
                 </Modal.Footer>
             </Form>
         </Modal>
-
     )
 }
