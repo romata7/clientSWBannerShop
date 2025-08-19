@@ -1,47 +1,60 @@
-import { Button, Container } from "react-bootstrap"
-import { Easel, Pencil, Plus, Printer } from "react-bootstrap-icons"
-import { DesignModal } from "../components/modals/DesignModal"
-
-import { ServicesProvider } from "../context/ServicesContext"
-import { DesignList } from "../components/DesignList"
-import { useState } from "react"
-import { ImpressionModal } from "../components/modals/ImpressionModal"
-import { ImpressionList } from "../components/ImpressionList"
-
+import { Button, Container } from "react-bootstrap";
+import { ServicesProvider } from "../context/ServicesContext";
+import { ServiceModal } from "../components/ServiceModal";
+import { SERVICES_CONFIG } from "../model/modelConfig";
+import { useState } from "react";
+import { Plus } from "react-bootstrap-icons";
 
 export const Services = () => {
-    const [showDesignModal, setShowDesignModal] = useState(false);
-    const [showImpressionModal, setShowImpressionModal] = useState(false)
+    const [activeModal, setActiveModal] = useState(null);
 
-    const handleShowDesignModal = () => setShowDesignModal(true);
-    const handleCloseDesignModal = () => setShowDesignModal(false);
+    const handleOpenModal = (serviceType) => {
+        setActiveModal(serviceType);
+    };
 
-    const handleShowImpressionModal = () => setShowImpressionModal(true);
-    const handleCloseImpressionModal = () => setShowImpressionModal(false);
+    const handleCloseModal = () => {
+        setActiveModal(null);
+    };
+
+    const onSubmit = (data) => {
+        console.log(data);
+        handleCloseModal();
+    };
 
     return (
         <ServicesProvider>
             <Container className="mt-4">
                 <div className="d-flex gap-2 align-self-center justify-content-center mb-3">
-                    <Button onClick={handleShowDesignModal}>
-                        <Plus /> <Pencil /> Diseño
-                    </Button>
-                    <Button onClick={handleShowImpressionModal}>
-                        <Plus /> <Printer /> Impresión
-                    </Button>
-
+                    {Object.entries(SERVICES_CONFIG).map(([key, config]) => {
+                        const Icon = config.icon;
+                        return (
+                            <Button 
+                                key={key} 
+                                onClick={() => handleOpenModal(key)}
+                            >
+                                <Plus /> <Icon /> {config.name}
+                            </Button>
+                        );
+                    })}
                 </div>
-                {showDesignModal && (
-                    <DesignModal show={showDesignModal} handleClose={handleCloseDesignModal} />
+
+                {/* Renderiza solo el modal activo */}
+                {activeModal && SERVICES_CONFIG[activeModal] && (
+                    <ServiceModal
+                        show={!!activeModal}
+                        handleClose={handleCloseModal}
+                        service={SERVICES_CONFIG[activeModal].name}
+                        fieldsConfig={SERVICES_CONFIG[activeModal].fields}
+                        initialData={SERVICES_CONFIG[activeModal].emptyData}
+                        onSubmit={onSubmit}
+                        operation="Agregar"
+                    />
                 )}
-                {showImpressionModal && (
-                    <ImpressionModal show={showImpressionModal} handleClose={handleCloseImpressionModal} />
-                )}
+
                 <div className="d-flex flex-column gap-3">
-                    <DesignList />
-                    <ImpressionList />
+                    {/* Tus listas de servicios (DesignList, ImpressionList, etc.) */}
                 </div>
             </Container>
         </ServicesProvider>
-    )
-}
+    );
+};
