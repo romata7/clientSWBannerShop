@@ -1,12 +1,18 @@
 import { Button, Container } from "react-bootstrap";
-import { ServicesProvider } from "../context/ServicesContext";
+import { useServicesContext } from "../context/ServicesContext";
 import { ServiceModal } from "../components/ServiceModal";
 import { SERVICES_CONFIG } from "../model/modelConfig";
 import { useState } from "react";
 import { Plus } from "react-bootstrap-icons";
+import { ServiceList } from "../components/ServiceList";
 
 export const Services = () => {
     const [activeModal, setActiveModal] = useState(null);
+
+    const {
+        getServiceDispatch,
+        getServiceItems
+    } = useServicesContext();
 
     const handleOpenModal = (serviceType) => {
         setActiveModal(serviceType);
@@ -17,44 +23,55 @@ export const Services = () => {
     };
 
     const onSubmit = (data) => {
-        console.log(data);
+        const dispatch = getServiceDispatch(activeModal);
+        const { id, ...restData } = data;
+
+        dispatch({
+            type: id ? 'UPDATE' : 'ADD',
+            payload: id
+                ? { ...restData, id }
+                : { ...restData, id: Date.now() }
+        });
+
         handleCloseModal();
     };
 
     return (
-        <ServicesProvider>
-            <Container className="mt-4">
-                <div className="d-flex gap-2 align-self-center justify-content-center mb-3">
-                    {Object.entries(SERVICES_CONFIG).map(([key, config]) => {
-                        const Icon = config.icon;
-                        return (
-                            <Button 
-                                key={key} 
-                                onClick={() => handleOpenModal(key)}
-                            >
-                                <Plus /> <Icon /> {config.name}
-                            </Button>
-                        );
-                    })}
-                </div>
+        <Container className="mt-4">
+            <div className="d-flex gap-2 align-self-center justify-content-center mb-3">
+                {Object.entries(SERVICES_CONFIG).map(([key, config]) => {
+                    const Icon = config.icon;
+                    return (
+                        <Button
+                            key={key}
+                            onClick={() => handleOpenModal(key)}
+                        >
+                            <Plus /> <Icon /> {config.name}
+                        </Button>
+                    );
+                })}
+            </div>
 
-                {/* Renderiza solo el modal activo */}
-                {activeModal && SERVICES_CONFIG[activeModal] && (
-                    <ServiceModal
-                        show={!!activeModal}
-                        handleClose={handleCloseModal}
-                        service={SERVICES_CONFIG[activeModal].name}
-                        fieldsConfig={SERVICES_CONFIG[activeModal].fields}
-                        initialData={SERVICES_CONFIG[activeModal].emptyData}
-                        onSubmit={onSubmit}
-                        operation="Agregar"
-                    />
-                )}
+            {activeModal && SERVICES_CONFIG[activeModal] && (
+                <ServiceModal
+                    show={!!activeModal}
+                    handleClose={handleCloseModal}
+                    service={SERVICES_CONFIG[activeModal].name}
+                    fieldsConfig={SERVICES_CONFIG[activeModal].fields}
+                    initialData={SERVICES_CONFIG[activeModal].emptyData}
+                    icon={SERVICES_CONFIG[activeModal].icon}
+                    onSubmit={onSubmit}
+                    operation="Agregar"
+                />
+            )}
 
-                <div className="d-flex flex-column gap-3">
-                    {/* Tus listas de servicios (DesignList, ImpressionList, etc.) */}
-                </div>
-            </Container>
-        </ServicesProvider>
+            <div className="d-flex flex-column gap-3">
+                {Object.entries(SERVICES_CONFIG).map(([key, value]) => {
+                    return (
+                        <ServiceList service={key} key={key} />
+                    )
+                })}
+            </div>
+        </Container>
     );
 };

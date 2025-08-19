@@ -1,51 +1,66 @@
-import { useCallback, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 
-export const useServices = () => {    
-
-    const [localDesign, setLocalDesign] = useState(null);
-    const [localImpression, setLocalImpression] = useState(null);
-
-    function designsReducer(state, action) {
-        switch (action.type) {
-            case 'ADD':
-                return [...state, { ...action.payload, id: Date.now() }];
-            case 'UPDATE':
-                return state.map(d =>
-                    d.id === action.payload.id ? { ...d, ...action.payload } : d
-                );
-            case 'REMOVE':
-                return state.filter(d => d.id !== action.payload);
-            default:
-                return state;
-        }
+function serviceReducer(state, action) {
+    switch (action.type) {
+        case 'ADD':
+            return [...state, { ...action.payload, id: Date.now() }];
+        case 'UPDATE':
+            return state.map(item =>
+                item.id === action.payload.id ? { ...item, ...action.payload } : item
+            );
+        case 'REMOVE':
+            return state.filter(item => item.id !== action.payload);
+        case 'RESET':
+            return [];
+        default:
+            return state;
     }
-    function printsReducer(state, action) {
-        switch (action.type) {
-            case 'ADD':
-                return [...state, { ...action.payload, id: Date.now() }];
-            case 'UPDATE':
-                return state.map(d =>
-                    d.id === action.payload.id ? { ...d, ...action.payload } : d
-                );
-            case 'REMOVE':
-                return state.filter(d => d.id !== action.payload);
-            default:
-                return state;
+}
+export const useServices = () => {
+    const [designs, designDispatch] = useReducer(serviceReducer, []);
+    const [impressions, impressionDispatch] = useReducer(serviceReducer, []);
+    const [installations, installationDispatch] = useReducer(serviceReducer, []);
+    const [maintenances, maintenanceDispatch] = useReducer(serviceReducer, []);
+
+    const getServiceDispatch = useCallback((type) => {
+        switch (type) {
+            case 'design': return designDispatch;
+            case 'impression': return impressionDispatch;
+            case 'installation': return installationDispatch;
+            case 'maintenance': return maintenanceDispatch;
+            default: return () => { };
         }
-    }
+    }, []);
 
-    const [designs, designDispatch] = useReducer(designsReducer, []);
-    const [impressions, impressionDispatch] = useReducer(printsReducer, []);
+    const getServiceItems = useCallback((type) => {
+        switch (type) {
+            case 'design': return designs;
+            case 'impression': return impressions;
+            case 'installation': return installations;
+            case 'maintenance': return maintenances;
+            default: return [];
+        }
+    }, [designs, impressions, installations, maintenances]);
 
+    useEffect(() => {
+        console.log('Designs:', designs);
+        console.log('Impressions:', impressions);
+        console.log('Installations:', installations);
+        console.log('Maintenances:', maintenances);
+    }, [designs, impressions, installations, maintenances]);
 
     return {
         designs,
         impressions,
+        installations,
+        maintenances,
+
         designDispatch,
         impressionDispatch,
-        localDesign,
-        setLocalDesign,
-        localImpression,
-        setLocalImpression
-    };
+        installationDispatch,
+        maintenanceDispatch,
+
+        getServiceDispatch,
+        getServiceItems,
+    }
 }

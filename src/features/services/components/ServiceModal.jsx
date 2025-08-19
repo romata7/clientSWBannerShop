@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, FloatingLabel, Form, Modal } from "react-bootstrap";
-
 
 export const ServiceModal = ({
     show,
@@ -9,9 +8,12 @@ export const ServiceModal = ({
     fieldsConfig,
     initialData,
     onSubmit,
-    operation
+    operation,
+    icon
 }) => {
     const [formData, setFormData] = useState(initialData);
+
+    const Icon = icon || ""
 
     const handleChange = (e) => {
         const { name, value, type, step } = e.target;
@@ -40,14 +42,24 @@ export const ServiceModal = ({
             setValidated(true);
             return;
         }
-
-        onSubmit(formData);
-        handleClose();
+        try {
+            onSubmit(formData);
+            handleClose();
+        } catch (error) {
+            console.error('Error al enviar el formario:', error);
+        }
     }
+
+    useEffect(() => {
+        if (show) {
+            setFormData(initialData);
+            setValidated(false);
+        }
+    }, [])
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>{operation} {service}</Modal.Title>
+                <Modal.Title><Icon /> {operation} {service}</Modal.Title>
             </Modal.Header>
             <Form
                 onSubmit={handleCheckForm}
@@ -55,22 +67,22 @@ export const ServiceModal = ({
                 validated={validated}
             >
                 <Modal.Body className="d-flex flex-column gap-3">
-                    {fieldsConfig.map(e => (
+                    {fieldsConfig.map(fieldConfig => (
                         <FloatingLabel
-                            key={e.name}
-                            controlId={e.name}
-                            label={e.label}
-                            aria-label={e.label}
+                            key={fieldConfig.name}
+                            controlId={fieldConfig.name}
+                            label={fieldConfig.label}
+                            aria-label={fieldConfig.label}
                         >
-                            {e.type === 'select'
+                            {fieldConfig.type === 'select'
                                 ? (
                                     <Form.Select
-                                        name={e.name}
-                                        value={formData[fieldsConfig.name]}
+                                        name={fieldConfig.name}
+                                        value={formData[fieldConfig.name] || ''}
                                         onChange={handleChange}
-                                        required={e?.required ?? true}
+                                        required={fieldConfig?.required ?? true}
                                     >
-                                        {e.options?.map(option => (
+                                        {fieldConfig.options?.map(option => (
                                             <option key={option.value} value={option.value}>
                                                 {option.label}
                                             </option>
@@ -79,19 +91,19 @@ export const ServiceModal = ({
                                 )
                                 : (<>
                                     <Form.Control
-                                        name={e.name}
-                                        value={formData[e.name]}
+                                        name={fieldConfig.name}
+                                        value={formData[fieldConfig.name]}
                                         onChange={handleChange}
-                                        required={e?.required ?? false}
-                                        autoFocus={e?.autoFocus ?? false}
+                                        required={fieldConfig?.required ?? false}
+                                        autoFocus={fieldConfig?.autoFocus ?? false}
                                         placeholder=""
 
-                                        {...(e.type === "textarea" && { as: "textarea", style: { height: "100px" } })}
-                                        {...(e.type === "number" && { type: "number", step: e.step, min: e.min })}
-                                        {...(e.type === "text" && { type: "text" })}
+                                        {...(fieldConfig.type === "textarea" && { as: "textarea", style: { height: "100px" } })}
+                                        {...(fieldConfig.type === "number" && { type: "number", step: fieldConfig.step, min: fieldConfig.min })}
+                                        {...(fieldConfig.type === "text" && { type: "text" })}
                                     />
                                     <Form.Control.Feedback type="invalid">
-                                        {e.errorMessage || "Campo inválido"}
+                                        {fieldConfig.errorMessage || "Campo inválido"}
                                     </Form.Control.Feedback>
                                 </>)
                             }

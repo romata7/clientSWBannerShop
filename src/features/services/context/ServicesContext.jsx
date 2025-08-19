@@ -4,10 +4,9 @@ import { useServices } from "../hooks/useServices";
 const ServicesContext = createContext();
 
 export const ServicesProvider = ({ children }) => {
-    const serviceData = useServices();
-
+    const services = useServices();
     return (
-        <ServicesContext.Provider value={serviceData}>
+        <ServicesContext.Provider value={services}>
             {children}
         </ServicesContext.Provider>
     );

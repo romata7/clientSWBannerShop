@@ -7,17 +7,21 @@ import { MainNavbar } from "./components/navbar/MainNavbar";
 import { Orders } from "./pages/Orders";
 import { ClientsProvider } from "./features/clients/context/ClientsContext";
 import { ToastContainer } from "react-bootstrap";
+import { ServicesProvider } from "./features/services/context/ServicesContext";
 
 const App = () => {
   return (
     <Router>
       <ClientsProvider>
-        <MainNavbar />
-        <Routes>
-          <Route path="/inicio" element={<Home />} />
-          <Route path="/clientes" element={<Clients />} />
-          <Route path="/ordenes" element={<Orders />} />
-        </Routes>
+        <ServicesProvider>
+
+          <MainNavbar />
+          <Routes>
+            <Route path="/inicio" element={<Home />} />
+            <Route path="/clientes" element={<Clients />} />
+            <Route path="/ordenes" element={<Orders />} />
+          </Routes>
+        </ServicesProvider>
       </ClientsProvider>
     </Router>
   );
