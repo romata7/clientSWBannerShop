@@ -65,10 +65,19 @@ export const Services = () => {
                 />
             )}
 
-            <div className="d-flex flex-column gap-3">
+            <div className="d-flex flex-column">
                 {Object.entries(SERVICES_CONFIG).map(([key, value]) => {
+                    const inputList = getServiceItems(key);
+                    const allKeys = Object.keys(value.emptyData);
+                    const keys = allKeys.filter(item => !['id', 'description', 'quantity', 'cost'].includes(item));
                     return (
-                        <ServiceList service={key} key={key} />
+                        <div key={key}>
+                            <ServiceList
+                                list={inputList}
+                                icon={value.icon}
+                                keys={keys}
+                            />
+                        </div>
                     )
                 })}
             </div>

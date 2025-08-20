@@ -42,13 +42,6 @@ export const useServices = () => {
         }
     }, [designs, impressions, installations, maintenances]);
 
-    useEffect(() => {
-        console.log('Designs:', designs);
-        console.log('Impressions:', impressions);
-        console.log('Installations:', installations);
-        console.log('Maintenances:', maintenances);
-    }, [designs, impressions, installations, maintenances]);
-
     return {
         designs,
         impressions,

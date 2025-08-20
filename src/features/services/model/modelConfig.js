@@ -1,4 +1,4 @@
-import { Gear, Pencil, Printer, Tools } from "react-bootstrap-icons";
+import { Gear, Hammer, Pencil, Printer, Tools } from "react-bootstrap-icons";
 
 export const SERVICES_CONFIG = {
     design: {
@@ -187,7 +187,7 @@ export const SERVICES_CONFIG = {
         }
     },
     maintenance: {
-        icon: Gear,
+        icon: Hammer,
         name: "Mantenimiento",
         fields: [
             {
