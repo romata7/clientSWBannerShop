@@ -1,9 +1,24 @@
 import { Badge, Button, ListGroup } from "react-bootstrap"
 import { useServicesContext } from "../context/ServicesContext"
-import { Pencil, Rulers, Trash } from "react-bootstrap-icons";
+import { Pencil, PencilSquare, Rulers, Trash } from "react-bootstrap-icons";
+import { DesignModal } from "./DesignModal";
+import { useState } from "react";
 
 export const DesignList = () => {
     const { designs } = useServicesContext();
+
+    const [show, setShow] = useState(false);
+    const [initialData, setInitialData] = useState(null);
+    const [operation, setOperation] = useState("Registrar");
+
+
+    const handleEdit = (data) => {
+        setInitialData(data);
+        setShow(true);
+        setOperation('Registrar');
+    }
+
+    const handleClose = () => setShow(false);
 
     if (designs.length === 0) {
         return;
@@ -27,21 +42,38 @@ export const DesignList = () => {
                                     </div>
                                 </div>
                                 <div className="align-self-center">
-                                    <Badge className="fs-5">
+                                    <Badge>
                                         S/ {(parseFloat(design.quantity) * parseFloat(design.cost)).toFixed(2)}
                                     </Badge>
                                 </div>
                             </div>
                         </div>
                         <div className="d-flex gap-2">
-                            <Button variant="danger">
-                                <Trash />
-                            </Button>
-                            <Button variant="warning"/>
+                            <Trash
+                                className="align-self-center"
+                                color="red"
+                                role="button"
+                                title="Eliminar"
+                            />
+                            <PencilSquare
+                                className="align-self-center"
+                                role="button"
+                                title="Modificar"
+                                onClick={() => handleEdit(design)}
+                            />
+
                         </div>
                     </div>
                 </ListGroup.Item>
             ))}
+            {show && (
+                <DesignModal
+                    show={show}
+                    initialData={initialData}
+                    operation={operation}
+                    handleClose={handleClose}
+                />
+            )}
         </ListGroup>
     )
 }
