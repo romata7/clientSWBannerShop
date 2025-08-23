@@ -4,7 +4,7 @@ import { ServiceModal } from "../components/ServiceModal";
 import { SERVICES_CONFIG } from "../model/modelConfig";
 import { useState } from "react";
 import { Plus } from "react-bootstrap-icons";
-import { ServiceList } from "../components/ServiceList";
+import { DesignList } from "../components/DesignList";
 
 export const Services = () => {
     const [activeModal, setActiveModal] = useState(null);
@@ -66,20 +66,7 @@ export const Services = () => {
             )}
 
             <div className="d-flex flex-column">
-                {Object.entries(SERVICES_CONFIG).map(([key, value]) => {
-                    const inputList = getServiceItems(key);
-                    const allKeys = Object.keys(value.emptyData);
-                    const keys = allKeys.filter(item => !['id', 'description', 'quantity', 'cost'].includes(item));
-                    return (
-                        <div key={key}>
-                            <ServiceList
-                                list={inputList}
-                                icon={value.icon}
-                                keys={keys}
-                            />
-                        </div>
-                    )
-                })}
+                <DesignList />
             </div>
         </Container>
     );

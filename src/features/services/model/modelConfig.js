@@ -22,16 +22,16 @@ export const SERVICES_CONFIG = {
                 errorMessage: "La descripción es obligatoria"
             },
             {
-                name: "height",
-                label: "Alto",
+                name: "width",
+                label: "Ancho",
                 type: "number",
                 step: 0.01,
                 min: 0.01,
                 required: true
             },
             {
-                name: "width",
-                label: "Ancho",
+                name: "height",
+                label: "Alto",
                 type: "number",
                 step: 0.01,
                 min: 0.01,
@@ -60,8 +60,8 @@ export const SERVICES_CONFIG = {
             id: null,
             quantity: 1,
             description: '',
-            height: 0.01,
             width: 0.01,
+            height: 0.01,
             unit: 'cm',
             cost: 0.01
         }
@@ -87,16 +87,16 @@ export const SERVICES_CONFIG = {
                 errorMessage: "La descripción es obligatoria"
             },
             {
-                name: "height",
-                label: "Alto",
+                name: "width",
+                label: "Ancho",
                 type: "number",
                 step: 0.01,
                 min: 0.01,
                 required: true
             },
             {
-                name: "width",
-                label: "Ancho",
+                name: "height",
+                label: "Alto",
                 type: "number",
                 step: 0.01,
                 min: 0.01,
