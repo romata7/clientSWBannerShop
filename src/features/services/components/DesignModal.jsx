@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Button, FloatingLabel, Form, Modal } from "react-bootstrap";
 import { Floppy, Gear, Pencil, Trash } from "react-bootstrap-icons";
+import { useServicesContext } from "../context/ServicesContext";
 
 const emptyData = {
     id: null,
-    quantity: 1,
+    quantity: 0,
     description: "",
     width: 0.00,
     height: 0.00,
@@ -13,6 +14,8 @@ const emptyData = {
 };
 
 export const DesignModal = ({ show, handleClose, initialData = emptyData, operation = "Registrar" }) => {
+    const { designDispatch } = useServicesContext()
+
     const isDeleteOperation = operation === "Eliminar";
     const variant = operation === "Eliminar"
         ? "danger"
@@ -28,10 +31,7 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
     const [data, setData] = useState(initialData);
     const [validated, setValidated] = useState(false);
 
-    // Agrega useEffect para actualizar el estado cuando cambien las props
-    useEffect(() => {
-        setData(initialData);
-    }, [initialData, show]);
+    useEffect(() => { setData(initialData) }, [show, initialData]);
 
     const handleCheckForm = (e) => {
         e.preventDefault();
@@ -42,8 +42,38 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
             return;
         };
         //tratar datos
+        //tratar datos
+        try {
+            switch (operation) {
+                case "Registrar":
+                    designDispatch({
+                        type: 'ADD',
+                        payload: {
+                            ...data,
+                            id: Date.now() // Generar ID único
+                        }
+                    });
+                    break;
+                case "Actualizar":
+                    designDispatch({
+                        type: 'UPDATE',
+                        payload: data
+                    });
+                    break;
+                case "Eliminar":
+                    designDispatch({
+                        type: 'REMOVE',
+                        payload: data.id // Solo necesitamos el ID para eliminar
+                    });
+                    break;
+                default:
+                    console.warn('Operación no reconocida:', operation);
+            }
+        } catch (error) {
+            console.error('Error al procesar la operación:', error);
+        }
         handleClose();
-    }
+    };
 
     const handleChange = (e) => {
         const { name, value, type, step } = e.target;
@@ -51,14 +81,14 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
         let parsedValue = value;
         if (type === "number") {
             parsedValue =
-                step === "0.01" // Cambiado a === y comillas
+                step == "0.01"
                     ? parseFloat(value) || 0
-                    : step === "1" // Cambiado a === y comillas
+                    : step == "1"
                         ? parseInt(value) || 0
                         : value;
         };
         setData(prev => ({ ...prev, [name]: parsedValue }));
-    }
+    };
 
     return (
         <Modal show={show} onHide={handleClose}>
@@ -72,13 +102,15 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
                 noValidate
                 validated={validated}
             >
+                {/* hacer q todo el body sea readonly */}
                 <fieldset disabled={isDeleteOperation}>
                     <Modal.Body className="d-flex flex-column gap-2">
-                        {/* Descripción - AGREGADO name */}
+
+
                         <FloatingLabel controlId="description" label="Descripción">
                             <Form.Control
-                                name="description" // Agregado name
                                 type="text"
+                                name="description"
                                 value={data.description}
                                 onChange={handleChange}
                                 placeholder=""
@@ -89,13 +121,14 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
                             </Form.Control.Feedback>
                         </FloatingLabel>
 
-                        <div className="row g-2 align-items-end">
+                        <div className="row g-2">
                             <div className="col-4">
                                 <FloatingLabel controlId="width" label="Ancho">
                                     <Form.Control
                                         name="width"
                                         type="number"
                                         step={0.01}
+                                        min={0.01}
                                         value={data.width}
                                         onChange={handleChange}
                                         placeholder=""
@@ -113,6 +146,7 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
                                         name="height"
                                         type="number"
                                         step={0.01}
+                                        min={0.01}
                                         value={data.height}
                                         onChange={handleChange}
                                         placeholder=""
@@ -137,19 +171,18 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
                                 </FloatingLabel>
                             </div>
                         </div>
-
-                        <div className="row g-2 align-items-end">
+                        <div className="row g-2">
                             <div className="col-4">
                                 <FloatingLabel controlId="quantity" label="Cantidad">
                                     <Form.Control
-                                        name="quantity" // Agregado name
                                         type="number"
                                         step={1}
+                                        min={1}
+                                        name="quantity"
                                         value={data.quantity}
                                         onChange={handleChange}
                                         placeholder=""
                                         required
-                                        min="1"
                                     />
                                     <Form.Control.Feedback type="invalid">
                                         Cantidad debe ser Mayor a 1
@@ -159,14 +192,14 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
                             <div className="col-4">
                                 <FloatingLabel controlId="cost" label="Costo (S/)">
                                     <Form.Control
-                                        name="cost" // Agregado name
                                         type="number"
                                         step={0.01}
+                                        min={0.01}
+                                        name="cost"
                                         value={data.cost}
                                         onChange={handleChange}
                                         placeholder=""
                                         required
-                                        min="0"
                                     />
                                     <Form.Control.Feedback type="invalid">
                                         Ingrese costo x diseño
@@ -174,7 +207,7 @@ export const DesignModal = ({ show, handleClose, initialData = emptyData, operat
                                 </FloatingLabel>
                             </div>
                             <div className="col-4">
-                                <div className="fw-bold align-self-center text-primary text-center">
+                                <div className="fw-bold text-primary text-center">
                                     <div className="d-flex flex-column">
                                         <div>
                                             Total:
