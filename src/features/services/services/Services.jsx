@@ -3,11 +3,17 @@ import { useServicesContext } from "../context/ServicesContext";
 import { ServiceModal } from "../components/ServiceModal";
 import { SERVICES_CONFIG } from "../model/modelConfig";
 import { useState } from "react";
-import { Plus } from "react-bootstrap-icons";
+import { Pencil, Plus } from "react-bootstrap-icons";
 import { DesignList } from "../components/DesignList";
+import { DesignModal } from "../components/DesignModal";
 
 export const Services = () => {
+
+    const [showDesignModal, setShowDesignModal] = useState(false)
     const [activeModal, setActiveModal] = useState(null);
+
+    const handleCloseDesign = () => setShowDesignModal(false);
+    const handleOpenDesign = () => setShowDesignModal(true);
 
     const {
         getServiceDispatch,
@@ -36,8 +42,14 @@ export const Services = () => {
         handleCloseModal();
     };
 
+
     return (
         <Container className="mt-4">
+            <Button
+                onClick={handleOpenDesign}
+            >
+                <Plus /> <Pencil /> Diseño
+            </Button>
             <div className="d-flex gap-2 align-self-center justify-content-center mb-3">
                 {Object.entries(SERVICES_CONFIG).map(([key, config]) => {
                     const Icon = config.icon;
@@ -68,6 +80,10 @@ export const Services = () => {
             <div className="d-flex flex-column">
                 <DesignList />
             </div>
+
+            {showDesignModal && (
+                <DesignModal show={showDesignModal} handleClose={handleCloseDesign} />
+            )}
         </Container>
     );
 };

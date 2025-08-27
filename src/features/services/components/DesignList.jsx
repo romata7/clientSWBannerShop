@@ -15,10 +15,20 @@ export const DesignList = () => {
     const handleEdit = (data) => {
         setInitialData(data);
         setShow(true);
-        setOperation('Registrar');
-    }
+        setOperation('Actualizar');
+    };
 
-    const handleClose = () => setShow(false);
+    const handleDelete = (data => {
+        setInitialData(data);
+        setShow(true);
+        setOperation("Eliminar");
+    })
+
+    const handleClose = () => {
+        setInitialData(null);
+        setShow(false);
+        setOperation("");
+    };
 
     if (designs.length === 0) {
         return;
@@ -54,6 +64,7 @@ export const DesignList = () => {
                                 color="red"
                                 role="button"
                                 title="Eliminar"
+                                onClick={() => handleDelete(design)}
                             />
                             <PencilSquare
                                 className="align-self-center"
